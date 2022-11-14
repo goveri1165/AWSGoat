@@ -29,7 +29,6 @@ resource "aws_vpc" "lab-vpc" {
 resource "aws_subnet" "lab-subnet-public-1" {
   vpc_id                  = aws_vpc.lab-vpc.id
   cidr_block              = "10.0.1.0/24"
-  map_public_ip_on_launch = true
   availability_zone       = data.aws_availability_zones.available.names[0]
 }
 resource "aws_internet_gateway" "my_vpc_igw" {
@@ -58,7 +57,6 @@ resource "aws_subnet" "lab-subnet-public-1b" {
   vpc_id                  = aws_vpc.lab-vpc.id
   cidr_block              = "10.0.128.0/24"
   availability_zone       = data.aws_availability_zones.available.names[1]
-  map_public_ip_on_launch = true
 }
 resource "aws_route_table_association" "my_vpc_us_east_1b_public" {
   subnet_id      = aws_subnet.lab-subnet-public-1b.id
@@ -509,6 +507,30 @@ resource "aws_s3_bucket" "bucket_tf_files" {
   tags = {
     Name        = "Do not delete Bucket"
     Environment = "Dev"
+  }
+}
+
+
+resource "aws_s3_bucket" "bucket_tf_files_log_bucket" {
+  bucket = "bucket_tf_files-log-bucket"
+}
+
+resource "aws_s3_bucket_logging" "bucket_tf_files" {
+  bucket = aws_s3_bucket.bucket_tf_files.id
+
+  target_bucket = aws_s3_bucket.bucket_tf_files_log_bucket.id
+  target_prefix = "log/"
+}
+
+
+
+resource "aws_s3_bucket_server_side_encryption_configuration" "bucket_tf_files" {
+  bucket = aws_s3_bucket.bucket_tf_files.bucket
+
+  rule {
+    apply_server_side_encryption_by_default {
+      sse_algorithm     = "AES256"
+    }
   }
 }
 
