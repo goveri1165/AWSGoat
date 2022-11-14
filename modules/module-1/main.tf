@@ -3201,6 +3201,30 @@ resource "aws_s3_bucket" "bucket_upload" {
 }
 
 
+resource "aws_s3_bucket" "bucket_upload_log_bucket" {
+  bucket = "bucket_upload-log-bucket"
+}
+
+resource "aws_s3_bucket_logging" "bucket_upload" {
+  bucket = aws_s3_bucket.bucket_upload.id
+
+  target_bucket = aws_s3_bucket.bucket_upload_log_bucket.id
+  target_prefix = "log/"
+}
+
+
+
+
+resource "aws_s3_bucket_server_side_encryption_configuration" "bucket_upload" {
+  bucket = aws_s3_bucket.bucket_upload.bucket
+
+  rule {
+    apply_server_side_encryption_by_default {
+      sse_algorithm     = "AES256"
+    }
+  }
+}
+
 resource "aws_s3_bucket_policy" "allow_access_for_prod" {
   bucket = aws_s3_bucket.bucket_upload.id
   policy = data.aws_iam_policy_document.allow_get_access.json
@@ -3256,6 +3280,29 @@ resource "aws_s3_bucket" "dev" {
     Environment = "Dev"
   }
 }
+
+resource "aws_s3_bucket" "dev_log_bucket" {
+  bucket = "dev-log-bucket"
+}
+
+resource "aws_s3_bucket_logging" "dev" {
+  bucket = aws_s3_bucket.dev.id
+
+  target_bucket = aws_s3_bucket.dev_log_bucket.id
+  target_prefix = "log/"
+}
+
+
+resource "aws_s3_bucket_server_side_encryption_configuration" "dev" {
+  bucket = aws_s3_bucket.dev.bucket
+
+  rule {
+    apply_server_side_encryption_by_default {
+      sse_algorithm     = "AES256"
+    }
+  }
+}
+
 resource "aws_s3_bucket_policy" "allow_access_for_dev" {
   bucket = aws_s3_bucket.dev.bucket
   policy = data.aws_iam_policy_document.allow_get_list_access.json
@@ -3306,6 +3353,30 @@ resource "aws_s3_bucket" "bucket_temp" {
   }
 }
 
+
+resource "aws_s3_bucket" "bucket_temp_log_bucket" {
+  bucket = "bucket_temp-log-bucket"
+}
+
+resource "aws_s3_bucket_logging" "bucket_temp" {
+  bucket = aws_s3_bucket.bucket_temp.id
+
+  target_bucket = aws_s3_bucket.bucket_temp_log_bucket.id
+  target_prefix = "log/"
+}
+
+
+
+resource "aws_s3_bucket_server_side_encryption_configuration" "bucket_temp" {
+  bucket = aws_s3_bucket.bucket_temp.bucket
+
+  rule {
+    apply_server_side_encryption_by_default {
+      sse_algorithm     = "AES256"
+    }
+  }
+}
+
 /* Uploading all files to ec2-temp-bucket-ACCOUNT_ID bucket */
 resource "aws_s3_bucket_object" "upload_temp_object" {
   for_each     = fileset("./resources/s3/webfiles/build/", "**")
@@ -3337,6 +3408,31 @@ resource "aws_s3_bucket" "bucket_tf_files" {
 }
 
 
+resource "aws_s3_bucket" "bucket_tf_files_log_bucket" {
+  bucket = "bucket_tf_files-log-bucket"
+}
+
+resource "aws_s3_bucket_logging" "bucket_tf_files" {
+  bucket = aws_s3_bucket.bucket_tf_files.id
+
+  target_bucket = aws_s3_bucket.bucket_tf_files_log_bucket.id
+  target_prefix = "log/"
+}
+
+
+
+resource "aws_s3_bucket_server_side_encryption_configuration" "bucket_tf_files" {
+  bucket = aws_s3_bucket.bucket_tf_files.bucket
+
+  rule {
+    apply_server_side_encryption_by_default {
+      sse_algorithm     = "AES256"
+    }
+  }
+}
+
+
+
 # VPC to deploy web app
 
 resource "aws_vpc" "goat_vpc" {
@@ -3357,7 +3453,6 @@ resource "aws_subnet" "goat_subnet" {
   vpc_id                  = aws_vpc.goat_vpc.id
   cidr_block              = "192.168.0.0/24"
   availability_zone       = "us-east-1a"
-  map_public_ip_on_launch = true
   tags = {
     Name = "AWS_GOAT App subnet"
   }
@@ -3626,4 +3721,3 @@ EOF
 output "app_url" {
   value = "${aws_api_gateway_stage.api.invoke_url}/react"
 }
-
