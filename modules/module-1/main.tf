@@ -3200,6 +3200,9 @@ resource "aws_s3_bucket" "bucket_upload" {
   }
 }
 
+resource "aws_s3_bucket_versioning" "versioning_example" {  bucket = aws_s3_bucket.bucket_upload.id
+  versioning_configuration {    status = "Disabled"  }}
+
 
 resource "aws_s3_bucket_policy" "allow_access_for_prod" {
   bucket = aws_s3_bucket.bucket_upload.id
