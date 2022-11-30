@@ -3201,6 +3201,7 @@ resource "aws_s3_bucket" "bucket_upload" {
 }
 
 
+
 resource "aws_s3_bucket_policy" "allow_access_for_prod" {
   bucket = aws_s3_bucket.bucket_upload.id
   policy = data.aws_iam_policy_document.allow_get_access.json
