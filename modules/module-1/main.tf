@@ -3206,6 +3206,7 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "example" {  bucke
       sse_algorithm     = "AES256"    }}
 }
 
+
 resource "aws_s3_bucket_policy" "allow_access_for_prod" {
   bucket = aws_s3_bucket.bucket_upload.id
   policy = data.aws_iam_policy_document.allow_get_access.json
